@@ -55,26 +55,24 @@ const LISTENING_SOURCES = [
 ];
 
 // ─── API CALL ─────────────────────────────────────────────────────────────────
+
+
 async function callOpenAI(messages, systemPrompt) {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const response = await fetch("/api/chat", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages
-      ]
-    })
+      messages,
+      systemPrompt,
+    }),
   });
 
   const data = await response.json();
 
-  return data.choices?.[0]?.message?.content || "";
-
+  return data.reply || "";
+}
 
 
 // ─── STORAGE HELPERS ──────────────────────────────────────────────────────────
@@ -237,62 +235,7 @@ Your role in this Speaking Practice session:
       )}
     </div>
   );
-}
-async function callOpenAI(messages, systemPrompt) {
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messages,
-      systemPrompt,
-    }),
-  });
 
-  const data = await response.json();
-
-  return data.reply;
-}
-
-async function startConversation() {
-  setStarted(true);
-  setLoading(true);
-
-  const opening = await callOpenAI(
-    [{ role: "user", content: "Start the conversation about today's topic." }],
-    SYSTEM
-  );
-
-  setMessages([{ role: "assistant", content: opening }]);
-
-  setLoading(false);
-}
-
-async function send() {
-  if (!input.trim() || loading) return;
-
-  const userMsg = { role: "user", content: input };
-
-  const newMsgs = [...messages, userMsg];
-
-  setMessages(newMsgs);
-
-  setInput("");
-
-  setLoading(true);
-
-  const reply = await callOpenAI(newMsgs, SYSTEM);
-
-  setMessages([
-    ...newMsgs,
-    { role: "assistant", content: reply }
-  ]);
-
-  setLoading(false);
-
-  onUpdate?.({ type: "speaking_done" });
-}
   
 // ─── WRITING MODULE ───────────────────────────────────────────────────────────
 
@@ -328,7 +271,7 @@ Analyze the text and return your feedback in this EXACT JSON structure (no markd
     if (!draft.trim() || loading) return;
     setLoading(true);
     setSubmitted(true);
-    const raw = await callClaude(
+    const raw = await callOpenAI(
       [{ role: "user", content: `Prompt: "${prompt}"\n\nText: "${draft}"` }],
       SYSTEM
     );
@@ -476,7 +419,7 @@ function ReadingModule() {
   async function analyze() {
     if (!text.trim() || loading) return;
     setLoading(true);
-    const raw = await callClaude(
+    const raw = await callOpenAI(
       [{ role: "user", content: `Analyze this text:\n\n${text.slice(0, 2000)}` }],
       SYSTEM
     );
