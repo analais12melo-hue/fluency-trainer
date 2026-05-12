@@ -19,11 +19,13 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // Retorna tudo para debug
     res.status(200).json({
-      reply: data.choices?.[0]?.message?.content || ""
+      reply: data.choices?.[0]?.message?.content || "",
+      debug: data
     });
 
   } catch (error) {
-    res.status(500).json({ error: "Erro ao conectar com OpenAI" });
+    res.status(500).json({ error: error.message });
   }
 }
