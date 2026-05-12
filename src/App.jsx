@@ -163,7 +163,7 @@ Your role in this Speaking Practice session:
   async function startConversation() {
     setStarted(true);
     setLoading(true);
-    const opening = await callClaude(
+    const opening = await callOpenAI(
       [{ role: "user", content: "Start the conversation about today's topic." }],
       SYSTEM
     );
@@ -178,7 +178,7 @@ Your role in this Speaking Practice session:
     setMessages(newMsgs);
     setInput("");
     setLoading(true);
-    const reply = await callClaude(newMsgs, SYSTEM);
+    const reply = await callOpenAI(newMsgs, SYSTEM);
     setMessages([...newMsgs, { role: "assistant", content: reply }]);
     setLoading(false);
     onUpdate?.({ type: "speaking_done" });
@@ -567,7 +567,7 @@ function ListeningModule() {
   async function analyze() {
     if (!transcript.trim() || loading) return;
     setLoading(true);
-    const raw = await callClaude(
+    const raw = await callOpenAI(
       [{ role: "user", content: transcript.slice(0, 2000) }],
       SYSTEM
     );
@@ -678,7 +678,7 @@ function TopicsModule({ profile }) {
     setMessages([]);
     setLoading(true);
     const SYSTEM = `You are an English coach teaching "${topic.label}" to a B1 learner going to B2. Start with a natural, interesting mini-lesson (not a grammar lecture). Show real examples from everyday speech. Then ask the learner a question that makes them USE the topic immediately. Keep it conversational and under 150 words.`;
-    const reply = await callClaude([{ role: "user", content: "Start the lesson." }], SYSTEM);
+    const reply = await callOpenAI([{ role: "user", content: "Start the lesson." }], SYSTEM);
     setMessages([{ role: "assistant", content: reply }]);
     setLoading(false);
   }
@@ -691,7 +691,7 @@ function TopicsModule({ profile }) {
     setMessages(newMsgs);
     setInput("");
     setLoading(true);
-    const reply = await callClaude(newMsgs, SYSTEM);
+    const reply = await callOpenAI(newMsgs, SYSTEM);
     setMessages([...newMsgs, { role: "assistant", content: reply }]);
     setLoading(false);
   }
