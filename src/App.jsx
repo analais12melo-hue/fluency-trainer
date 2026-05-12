@@ -56,23 +56,28 @@ const LISTENING_SOURCES = [
 
 // ─── API CALL ─────────────────────────────────────────────────────────────────
 
-
 async function callOpenAI(messages, systemPrompt) {
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messages,
-      systemPrompt,
-    }),
-  });
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages,
+        systemPrompt,
+      }),
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  return data.reply || "";
+    return data.reply || "No response.";
+  } catch (error) {
+    console.error(error);
+    return "Error connecting to AI.";
+  }
 }
+
 
 
 // ─── STORAGE HELPERS ──────────────────────────────────────────────────────────
