@@ -169,7 +169,30 @@ Your role in this Speaking Practice session:
 
     setLoading(true);
 
-    const opening = await callOpenAI(
+   async function startConversation() {
+  setStarted(true);
+
+  setLoading(true);
+
+  const opening = await callOpenAI(
+    [
+      {
+        role: "user",
+        content: "Start the conversation about today's topic.",
+      },
+    ],
+    SYSTEM
+  );
+
+  setMessages([
+    {
+      role: "assistant",
+      content: opening,
+    },
+  ]);
+
+  setLoading(false);
+}
       [
         {
           role: "user",
