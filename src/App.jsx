@@ -55,21 +55,28 @@ const LISTENING_SOURCES = [
 ];
 
 // ─── API CALL ─────────────────────────────────────────────────────────────────
-
-async function callClaude(messages, systemPrompt) {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+async function callOpenAI(messages, systemPrompt) {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+    },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages,
-    }),
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages
+      ]
+    })
   });
+
   const data = await response.json();
-  return data.content?.map((b) => b.text || "").join("\n") || "";
+
+  return data.choices?.[0]?.message?.content || "";
 }
+
+
 
 // ─── STORAGE HELPERS ──────────────────────────────────────────────────────────
 
