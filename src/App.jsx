@@ -1,2 +1,7 @@
 export default function App() {
-  return <h1>Funcionando 🚀</h1>}
+  return (
+    <div style={{ padding: 40, background: "yellow" }}>
+      FUNCIONANDO MESMO 🚀
+    </div>
+  )
+}
