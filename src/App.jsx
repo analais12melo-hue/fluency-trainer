@@ -235,7 +235,7 @@ Your role in this Speaking Practice session:
       )}
     </div>
   );
-
+}
   
 // ─── WRITING MODULE ───────────────────────────────────────────────────────────
 
