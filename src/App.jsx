@@ -78,8 +78,6 @@ async function callOpenAI(messages, systemPrompt) {
   }
 }
 
-
-
 // ─── STORAGE HELPERS ──────────────────────────────────────────────────────────
 
 function loadState(key, fallback) {
@@ -137,6 +135,7 @@ function Spinner() {
 }
 
 // ─── SPEAKING MODULE ─────────────────────────────────────────────────────────
+
 function SpeakingModule({ profile, onUpdate }) {
   const [topic] = useState(() => {
     const idx = new Date().getDate() % SPEAKING_TOPICS.length;
@@ -147,119 +146,11 @@ function SpeakingModule({ profile, onUpdate }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
-
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const SYSTEM = `You are a warm, engaging English fluency coach helping a B1 learner reach B2.
-Your role in this Speaking Practice session:
-- Topic for today: "${topic}"
-- Have a REAL conversation.
-- Ask follow-up questions naturally.
-- Correct gently.
-- Keep responses under 120 words.`;
-
-  async function startConversation() {
-    setStarted(true);
-
-    setLoading(true);
-
-   async function startConversation() {
-  setStarted(true);
-
-  setLoading(true);
-
-  const opening = await callOpenAI(
-    [
-      {
-        role: "user",
-        content: "Start the conversation about today's topic.",
-      },
-    ],
-    SYSTEM
-  );
-
-  setMessages([
-    {
-      role: "assistant",
-      content: opening,
-    },
-  ]);
-
-  setLoading(false);
-}
-      [
-        {
-          role: "user",
-          content: "Start the conversation about today's topic.",
-        },
-      ],
-      SYSTEM
-    );
-
-    setMessages([
-      {
-        role: "assistant",
-        content: opening,
-      },
-    ]);
-
-    setLoading(false);
-  }
-
-  async function send() {
-    if (!input.trim() || loading) return;
-
-    const userMsg = {
-      role: "user",
-      content: input,
-    };
-
-    const newMsgs = [...messages, userMsg];
-
-    setMessages(newMsgs);
-
-    setInput("");
-
-    setLoading(true);
-
-    const reply = await callOpenAI(newMsgs, SYSTEM);
-
-    setMessages([
-      ...newMsgs,
-      {
-        role: "assistant",
-        content: reply,
-      
-      },
-    ]);
-
-    setLoading(false);
-
-    onUpdate?.({
-      type: "speaking_done",
-    });
-  }
-
-    
-  
-
-  const [topic] = useState(() => {
-    const idx = new Date().getDate() % SPEAKING_TOPICS.length;
-    return SPEAKING_TOPICS[idx];
-  });
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [started, setStarted] = useState(false);
-  const bottomRef = useRef(null);
-
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const SYSTEM = `You are a warm, engaging English fluency coach helping a B1 learner reach B2.
 Your role in this Speaking Practice session:
@@ -270,7 +161,39 @@ Your role in this Speaking Practice session:
 - NEVER break the conversational flow with a grammar lecture.
 - Suggest B2-level vocabulary naturally.
 - Keep responses under 120 words. Be human, curious, a little witty.
-- User profile notes: ${JSON.stringify(profile?.
+- User profile notes: ${JSON.stringify(profile?.weaknesses || [])}`;
+
+  async function startConversation() {
+    setStarted(true);
+    setLoading(true);
+
+    const opening = await callOpenAI(
+      [{ role: "user", content: "Start the conversation about today's topic." }],
+      SYSTEM
+    );
+
+    setMessages([{ role: "assistant", content: opening }]);
+    setLoading(false);
+  }
+
+  async function send() {
+    if (!input.trim() || loading) return;
+
+    const userMsg = { role: "user", content: input };
+    const newMsgs = [...messages, userMsg];
+
+    setMessages(newMsgs);
+    setInput("");
+    setLoading(true);
+
+    const reply = await callOpenAI(newMsgs, SYSTEM);
+
+    setMessages([...newMsgs, { role: "assistant", content: reply }]);
+    setLoading(false);
+
+    onUpdate?.({ type: "speaking_done" });
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ padding: "20px 24px 12px", borderBottom: "1px solid #1e1e1e" }}>
@@ -337,7 +260,7 @@ Your role in this Speaking Practice session:
     </div>
   );
 }
-  
+
 // ─── WRITING MODULE ───────────────────────────────────────────────────────────
 
 function WritingModule({ profile, onUpdate }) {
@@ -378,8 +301,9 @@ Analyze the text and return your feedback in this EXACT JSON structure (no markd
     );
     try {
       const cleaned = raw.replace(/```json|```/g, "").trim();
-      setFeedback(JSON.parse(cleaned));
-      onUpdate?.({ type: "writing_done", weaknesses: JSON.parse(cleaned).weaknesses });
+      const parsed = JSON.parse(cleaned);
+      setFeedback(parsed);
+      onUpdate?.({ type: "writing_done", weaknesses: parsed.weaknesses });
     } catch {
       setFeedback({ overall_comment: raw });
     }
@@ -764,44 +688,28 @@ function TopicsModule({ profile }) {
     setSelected(topic);
     setMessages([]);
     setLoading(true);
-    const SYSTEM = `You are an English coach teaching "${topic.label}" to a B1 learner going to B2. Start with a natural, interesting mini-lesson (not a grammar lecture). Show real examples from everyday speech. Then ask the learner a question that makes them USE the topic immediately. Keep it conversational and under 150 words.`;
-    const reply = await callOpenAI([{ role: "user", content: "Start the lesson." }], SYSTEM);
+    const topicSystem = `You are an English coach teaching "${topic.label}" to a B1 learner going to B2. Start with a natural, interesting mini-lesson (not a grammar lecture). Show real examples from everyday speech. Then ask the learner a question that makes them USE the topic immediately. Keep it conversational and under 150 words.`;
+    const reply = await callOpenAI([{ role: "user", content: "Start the lesson." }], topicSystem);
     setMessages([{ role: "assistant", content: reply }]);
     setLoading(false);
   }
 
   async function send() {
-  if (!input.trim() || loading) return;
+    if (!input.trim() || loading || !selected) return;
 
-  const userMsg = {
-    role: "user",
-    content: input,
-  };
+    const topicSystem = `You are an English coach teaching "${selected.label}" to a B1 learner going to B2. Continue the lesson conversation. Correct gently, keep it engaging, under 150 words.`;
+    const userMsg = { role: "user", content: input };
+    const newMsgs = [...messages, userMsg];
 
-  const newMsgs = [...messages, userMsg];
+    setMessages(newMsgs);
+    setInput("");
+    setLoading(true);
 
-  setMessages(newMsgs);
+    const reply = await callOpenAI(newMsgs, topicSystem);
 
-  setInput("");
-
-  setLoading(true);
-
-  const reply = await callOpenAI(newMsgs, SYSTEM);
-
-  setMessages([
-    ...newMsgs,
-    {
-      role: "assistant",
-      content: reply,
-    },
-  ]);
-
-  setLoading(false);
-
-  onUpdate?.({
-    type: "speaking_done",
-  });
-}
+    setMessages([...newMsgs, { role: "assistant", content: reply }]);
+    setLoading(false);
+  }
 
   if (selected) {
     return (
