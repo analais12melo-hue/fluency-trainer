@@ -708,17 +708,37 @@ function TopicsModule({ profile }) {
   }
 
   async function send() {
-    if (!input.trim() || !selected || loading) return;
-    const SYSTEM = `You are teaching "${selected.label}" to a B1→B2 English learner. Continue the lesson conversationally. Correct gently, explain briefly, always ask a follow-up to make them practice more. Max 120 words.`;
-    const userMsg = { role: "user", content: input };
-    const newMsgs = [...messages, userMsg];
-    setMessages(newMsgs);
-    setInput("");
-    setLoading(true);
-    const reply = await callOpenAI(newMsgs, SYSTEM);
-    setMessages([...newMsgs, { role: "assistant", content: reply }]);
-    setLoading(false);
-  }
+  if (!input.trim() || loading) return;
+
+  const userMsg = {
+    role: "user",
+    content: input,
+  };
+
+  const newMsgs = [...messages, userMsg];
+
+  setMessages(newMsgs);
+
+  setInput("");
+
+  setLoading(true);
+
+  const reply = await callOpenAI(newMsgs, SYSTEM);
+
+  setMessages([
+    ...newMsgs,
+    {
+      role: "assistant",
+      content: reply,
+    },
+  ]);
+
+  setLoading(false);
+
+  onUpdate?.({
+    type: "speaking_done",
+  });
+}
 
   if (selected) {
     return (
