@@ -227,7 +227,7 @@ Your role in this Speaking Practice session:
     setLoading(true);
     const opening = await callOpenAI(
       [{ role: "user", content: "Start the conversation about today's topic." }],
-      SYSTEM
+      SYSTEM);
     );
     setMessages([{ role: "assistant", content: opening }]);
     setLoading(false);
