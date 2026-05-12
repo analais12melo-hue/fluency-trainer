@@ -139,28 +139,7 @@ function Spinner() {
 // ─── SPEAKING MODULE ─────────────────────────────────────────────────────────
 
 function SpeakingModule({ profile, onUpdate }) {
-  const [topic] = useState(() => {
-    const idx = new Date().getDate() % SPEAKING_TOPICS.length;
-    return SPEAKING_TOPICS[idx];
-  });
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [started, setStarted] = useState(false);
-  const bottomRef = useRef(null);
-
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-
-  const SYSTEM = `You are a warm, engaging English fluency coach helping a B1 learner reach B2.
-Your role in this Speaking Practice session:
-- Topic for today: "${topic}"
-- Have a REAL conversation. Ask one follow-up question at a time.
-- After 2-3 exchanges, gently point out 1-2 phrases that could sound more natural.
-- Encourage specificity: if they're vague, ask "Can you give me an example?"
-- NEVER break the conversational flow with a grammar lecture.
-- Suggest B2-level vocabulary naturally.
-- Keep responses under 120 words. Be human, curious, a little witty.
-- User profile notes: ${JSON.stringify(profile?.weaknesses || [])}`;
+  weaknesses || [])}`;
 
   async function startConversation() {
     async function send() {
@@ -207,6 +186,28 @@ Your role in this Speaking Practice session:
 
   
 
+  const [topic] = useState(() => {
+    const idx = new Date().getDate() % SPEAKING_TOPICS.length;
+    return SPEAKING_TOPICS[idx];
+  });
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
+  const bottomRef = useRef(null);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  const SYSTEM = `You are a warm, engaging English fluency coach helping a B1 learner reach B2.
+Your role in this Speaking Practice session:
+- Topic for today: "${topic}"
+- Have a REAL conversation. Ask one follow-up question at a time.
+- After 2-3 exchanges, gently point out 1-2 phrases that could sound more natural.
+- Encourage specificity: if they're vague, ask "Can you give me an example?"
+- NEVER break the conversational flow with a grammar lecture.
+- Suggest B2-level vocabulary naturally.
+- Keep responses under 120 words. Be human, curious, a little witty.
+- User profile notes: ${JSON.stringify(profile?.
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ padding: "20px 24px 12px", borderBottom: "1px solid #1e1e1e" }}>
