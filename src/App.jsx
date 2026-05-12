@@ -137,43 +137,92 @@ function Spinner() {
 }
 
 // ─── SPEAKING MODULE ─────────────────────────────────────────────────────────
-
 function SpeakingModule({ profile, onUpdate }) {
-  weaknesses || [])}`;
+  const [topic] = useState(() => {
+    const idx = new Date().getDate() % SPEAKING_TOPICS.length;
+    return SPEAKING_TOPICS[idx];
+  });
+
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
+
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
+
+  const SYSTEM = `You are a warm, engaging English fluency coach helping a B1 learner reach B2.
+Your role in this Speaking Practice session:
+- Topic for today: "${topic}"
+- Have a REAL conversation.
+- Ask follow-up questions naturally.
+- Correct gently.
+- Keep responses under 120 words.`;
 
   async function startConversation() {
-    async function send() {
-  if (!input.trim() || loading) return;
+    setStarted(true);
 
-  const userMsg = {
-    role: "user",
-    content: input
-  };
+    setLoading(true);
 
-  const newMsgs = [...messages, userMsg];
+    const opening = await callOpenAI(
+      [
+        {
+          role: "user",
+          content: "Start the conversation about today's topic.",
+        },
+      ],
+      SYSTEM
+    );
 
-  setMessages(newMsgs);
+    setMessages([
+      {
+        role: "assistant",
+        content: opening,
+      },
+    ]);
 
-  setInput("");
+    setLoading(false);
+  }
 
-  setLoading(true);
+  async function send() {
+    if (!input.trim() || loading) return;
 
-  const reply = await callOpenAI(newMsgs, SYSTEM);
+    const userMsg = {
+      role: "user",
+      content: input,
+    };
 
-  setMessages([
-    ...newMsgs,
-    {
-      role: "assistant",
-      content: reply
-    }
-  ]);
+    const newMsgs = [...messages, userMsg];
 
-  setLoading(false);
+    setMessages(newMsgs);
 
-  onUpdate?.({
-    type: "speaking_done"
-  });
-}
+    setInput("");
+
+    setLoading(true);
+
+    const reply = await callOpenAI(newMsgs, SYSTEM);
+
+    setMessages([
+      ...newMsgs,
+      {
+        role: "assistant",
+        content: reply,
+      
+      },
+    ]);
+
+    setLoading(false);
+
+    onUpdate?.({
+      type: "speaking_done",
+    });
+  }
+
     setStarted(true);
     setLoading(true);
     const opening = await callOpenAI(
