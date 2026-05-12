@@ -163,6 +163,38 @@ Your role in this Speaking Practice session:
 - User profile notes: ${JSON.stringify(profile?.weaknesses || [])}`;
 
   async function startConversation() {
+    async function send() {
+  if (!input.trim() || loading) return;
+
+  const userMsg = {
+    role: "user",
+    content: input
+  };
+
+  const newMsgs = [...messages, userMsg];
+
+  setMessages(newMsgs);
+
+  setInput("");
+
+  setLoading(true);
+
+  const reply = await callOpenAI(newMsgs, SYSTEM);
+
+  setMessages([
+    ...newMsgs,
+    {
+      role: "assistant",
+      content: reply
+    }
+  ]);
+
+  setLoading(false);
+
+  onUpdate?.({
+    type: "speaking_done"
+  });
+}
     setStarted(true);
     setLoading(true);
     const opening = await callOpenAI(
