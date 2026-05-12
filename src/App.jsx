@@ -246,16 +246,7 @@ Your role in this Speaking Practice session:
     });
   }
 
-    setStarted(true);
-    setLoading(true);
-    const opening = await callOpenAI(
-      [{ role: "user", content: "Start the conversation about today's topic." }],
-      SYSTEM);
-    );
-    setMessages([{ role: "assistant", content: opening }]);
-    setLoading(false);
-  }
-
+    
   
 
   const [topic] = useState(() => {
